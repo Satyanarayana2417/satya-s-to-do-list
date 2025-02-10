@@ -1,4 +1,3 @@
-/* to do list*/
 :root {
     --primary-color: #4a90e2;
     --secondary-color: #f5f6fa;
@@ -270,24 +269,208 @@ header {
 .swipe-delete {
     animation: swipeOut 0.3s ease forwards;
 }
+/* Make sidebar fluid */
+.sidebar {
+    flex: 0 0 25%; /* Takes 25% of the container width */
+    min-width: min-content;
+    background-color: white;
+    padding: 1.25rem;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .app-header {
+/* Mobile Navigation Styles */
+.nav-toggle {
+    display: none;
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 1000;
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+    .nav-toggle {
+        display: block;
+    }
+
+    .container {
+        position: relative;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        height: 100vh;
+        z-index: 999;
+        transition: left 0.3s ease;
+        flex: 0 0 85%; /* Take most of the screen but not all */
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main-content {
+        flex: 1;
+        padding: 4rem 1rem 1rem;
+    }
+
+    header {
         flex-direction: column;
-        gap: 15px;
+        gap: 1rem;
     }
 
-    .header-right {
-        width: 100%;
-        justify-content: center;
-    }
-
-    #searchNotes {
+    .search-bar {
         width: 100%;
     }
 
-    .notes-grid {
-        grid-template-columns: 1fr;
+    /* Task Items */
+    .task-item {
+        flex-direction: column;
+        gap: 0.625rem;
     }
+
+    .task-actions {
+        width: 100%;
+        justify-content: flex-end;
+        padding-top: 0.625rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Overlay */
+    .overlay {
+        display: none;
+        position: fixed;
+        inset: 0; /* Shorthand for top, right, bottom, left: 0 */
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+    }
+
+    .overlay.active {
+        display: block;
+    }
+
+    /* Modal adjustments */
+    .modal-content {
+        width: 90%;
+        margin: 1.25rem auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    /* Menu items adjustments */
+    .menu li {
+        padding: 0.75rem;
+        margin: 0.3125rem 0;
+    }
+
+    /* Form adjustments */
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+
+    /* Button adjustments */
+    .add-task-btn,
+    .clear-all,
+    .btn-save,
+    .btn-cancel {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+}
+
+/* Small mobile screens */
+@media screen and (max-width: 480px) {
+    .sidebar {
+        flex: 0 0 90%; /* Even more width on very small screens */
+    }
+
+    .task-meta {
+        flex-direction: column;
+        gap: 0.3125rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 1rem;
+    }
+}
+/* Add at the end of your styles.css file */
+.nav-toggle {
+    display: none;
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 1000;
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+}
+
+.overlay.active {
+    display: block;
+}
+
+@media screen and (max-width: 768px) {
+    .nav-toggle {
+        display: block;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        height: 100vh;
+        z-index: 999;
+        transition: left 0.3s ease;
+        flex: 0 0 85%;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main-content {
+        flex: 1;
+        padding: 4rem 1rem 1rem;
+    }
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #357abd;
 }
