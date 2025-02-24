@@ -404,56 +404,6 @@ header {
         padding: 1rem;
     }
 }
-/* Add at the end of your styles.css file */
-.nav-toggle {
-    display: none;
-    position: fixed;
-    top: 1.25rem;
-    left: 1.25rem;
-    z-index: 1000;
-    background: none;
-    border: none;
-    color: var(--primary-color);
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-.overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 998;
-}
-
-.overlay.active {
-    display: block;
-}
-
-@media screen and (max-width: 768px) {
-    .nav-toggle {
-        display: block;
-    }
-
-    .sidebar {
-        position: fixed;
-        left: -100%;
-        top: 0;
-        height: 100vh;
-        z-index: 999;
-        transition: left 0.3s ease;
-        flex: 0 0 85%;
-    }
-
-    .sidebar.active {
-        left: 0;
-    }
-
-    .main-content {
-        flex: 1;
-        padding: 4rem 1rem 1rem;
-    }
-}
 
 .logout-btn {
     width: 100%;
@@ -473,4 +423,16 @@ header {
 
 .logout-btn:hover {
     background-color: #357abd;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+}
+
+.overlay.active {
+    display: block;
 }

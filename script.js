@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentSection = 'today';
     let editingTaskId = null;
+    let currentUser = null;
 
     // Event Listeners
     addTaskBtn.addEventListener('click', () => {
@@ -61,7 +62,8 @@ document.addEventListener('DOMContentLoaded', function() {
             category: document.getElementById('taskCategory').value,
             important: document.getElementById('taskImportant').checked,
             completed: false,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            userId: currentUser.uid
         };
 
         try {
@@ -91,10 +93,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load Tasks Based on Section
     async function loadTasks() {
+        console.log('Loading tasks for section:', currentSection); // Debugging log
         tasksContainer.innerHTML = '<div class="loading">Loading tasks...</div>';
 
         try {
-            let query = db.collection('tasks');
+            let query = db.collection('tasks').where('userId', '==', currentUser.uid);
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -125,9 +128,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
             }
 
+            console.log('Query parameters:', query); // Debugging log
+
             const snapshot = await query.get();
 
             if (snapshot.empty) {
+                console.log('No tasks found'); // Debugging log
                 tasksContainer.innerHTML = '<div class="no-tasks">No tasks found</div>';
                 return;
             }
@@ -135,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tasksContainer.innerHTML = '';
             snapshot.forEach(doc => {
                 const task = { id: doc.id, ...doc.data() };
+                console.log('Task found:', task); // Debugging log
                 renderTask(task);
             });
 
@@ -209,10 +216,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Toggle Task Completion
     async function toggleComplete(taskId) {
+        console.log('Toggling completion for task with ID:', taskId); // Debugging log
         try {
             const taskRef = db.collection('tasks').doc(taskId);
             const doc = await taskRef.get();
-            const newStatus = !doc.data().completed;
+            if (!doc.exists) {
+                throw new Error('Task not found');
+            }
+            const task = doc.data();
+            console.log('Task data:', task); // Debugging log
+            const newStatus = !task.completed;
             
             await taskRef.update({
                 completed: newStatus
@@ -227,9 +240,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Edit Task
     async function editTask(taskId) {
+        console.log('Editing task with ID:', taskId); // Debugging log
         try {
             const doc = await db.collection('tasks').doc(taskId).get();
+            if (!doc.exists) {
+                throw new Error('Task not found');
+            }
             const task = doc.data();
+            console.log('Task data:', task); // Debugging log
             
             document.getElementById('modalTitle').textContent = 'Edit Task';
             document.getElementById('taskTitle').value = task.title;
@@ -246,26 +264,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Attach functions to the window object to make them globally accessible
+    window.toggleComplete = toggleComplete;
+    window.editTask = editTask;
+    window.deleteTask = deleteTask;
+
     // Delete Task
     async function deleteTask(taskId) {
-        if (confirm('Are you sure you want to delete this task?')) {
-            try {
-                await db.collection('tasks').doc(taskId).delete();
-                loadTasks();
-            } catch (error) {
-                console.error('Error deleting task:', error);
-                alert('Error deleting task. Please try again.');
-            }
+        console.log('Deleting task with ID:', taskId); // Debugging log
+        try {
+            await db.collection('tasks').doc(taskId).delete();
+            loadTasks();
+        } catch (error) {
+            console.error('Error deleting task:', error);
+            alert('Error deleting task. Please try again.');
         }
     }
 
     // Clear All Tasks
     clearAllBtn.addEventListener('click', async () => {
+        console.log('Clear All Tasks button clicked'); // Debugging log
         if (confirm('Are you sure you want to clear all completed tasks?')) {
             try {
                 const snapshot = await db.collection('tasks')
+                    .where('userId', '==', currentUser.uid)
                     .where('completed', '==', true)
                     .get();
+
+                if (snapshot.empty) {
+                    console.log('No completed tasks found'); // Debugging log
+                    alert('No completed tasks to clear.');
+                    return;
+                }
 
                 const batch = db.batch();
                 snapshot.forEach(doc => {
@@ -273,8 +303,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 await batch.commit();
                 
+                console.log('Completed tasks cleared'); // Debugging log
                 loadTasks();
-            }catch (error) {
+            } catch (error) {
                 console.error('Error clearing tasks:', error);
                 alert('Error clearing tasks. Please try again.');
             }
@@ -298,21 +329,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    logoutBtn.addEventListener('click', async () => {
-        try {
-            await firebase.auth().signOut();
-            window.location.href = 'index.html'; // Redirect to login page after logout
-        } catch (error) {
-            console.error('Logout error:', error);
-            alert('Error logging out. Please try again.');
-        }
-    });
+    // Check if logoutBtn exists before adding event listener
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await firebase.auth().signOut();
+                window.location.href = 'index.html'; // Redirect to login page after logout
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Error logging out. Please try again.');
+            }
+        });
+    }
 
     // Check user authentication on index2.html load
     firebase.auth().onAuthStateChanged(user => {
         if (!user) {
             window.location.href = 'index.html'; // Redirect to login page if not authenticated
         } else {
+            currentUser = user;
+            console.log('User authenticated:', currentUser); // Debugging log
             loadTasks(); // Only load tasks if the user is authenticated
         }
     });
@@ -343,4 +379,23 @@ document.addEventListener('DOMContentLoaded', function() {
             overlay.classList.remove('active');
         }
     });
+
+    // Show success message on signup
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                await firebase.auth().createUserWithEmailAndPassword(email, password);
+                alert('Signup successful! Please log in.');
+                window.location.href = 'index.html'; // Redirect to login page after signup
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Error signing up. Please try again.');
+            }
+        });
+    }
 });

@@ -11,6 +11,11 @@
 </head>
 
 <body>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="overlay"></div>
+
     <div class="container">
         <!-- Sidebar Menu -->
         <nav class="sidebar">
@@ -118,20 +123,6 @@
         src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.8.0/firebase-firestore-compat.min.js"></script>
 
     <script src="script.js"></script>
-    <!-- Add these two lines first -->
-    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
-        <i class="fas fa-bars"></i>
-    </button>
-    <div class="overlay"></div>
-
-    <!-- Then your existing container div starts -->
-    <div class="container">
-        <!-- Rest of your existing code -->
-        <nav class="sidebar">
-            ...
-        </nav>
-        ...
-    </div>
 
     <script>
         function closeModal() {
